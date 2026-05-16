@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,18 +33,29 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body select-none overflow-x-hidden;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 }
 
 .mobile-container {
-  max-width: 500px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   min-height: 100vh;
-  @apply bg-background shadow-xl relative;
+  @apply bg-background relative;
 }
 
 input, textarea, button {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+}
+
+/* Adjust for Capacitor status bar / safe areas */
+header {
+  padding-top: env(safe-area-inset-top, 1.5rem);
+}
+
+.fixed-bottom {
+  bottom: env(safe-area-inset-bottom, 1.5rem);
 }
