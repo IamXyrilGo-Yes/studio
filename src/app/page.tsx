@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -49,6 +50,36 @@ export default function PisoMateApp() {
       db.deleteClient(id)
       setClients(clients.filter(c => c.id !== id))
       toast({ title: "Client deleted" })
+    }
+  }
+
+  const handleDeletePayment = (paymentId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!selectedClient) return
+
+    if (confirm("Are you sure you want to delete this installment?")) {
+      const paymentToDelete = selectedClient.payments.find(p => p.id === paymentId)
+      if (!paymentToDelete) return
+
+      let updatedTotalPaid = selectedClient.totalPaid
+      let updatedOutstanding = selectedClient.outstandingBalance
+
+      if (paymentToDelete.status === 'paid') {
+        updatedTotalPaid -= paymentToDelete.amount
+        updatedOutstanding += paymentToDelete.amount
+      }
+
+      const updatedPayments = selectedClient.payments.filter(p => p.id !== paymentId)
+      
+      const updatedClient = {
+        ...selectedClient,
+        payments: updatedPayments,
+        totalPaid: updatedTotalPaid,
+        outstandingBalance: updatedOutstanding
+      }
+      
+      updateClientState(updatedClient)
+      toast({ title: "Installment deleted" })
     }
   }
 
@@ -254,7 +285,7 @@ export default function PisoMateApp() {
               {selectedClient.payments.map((payment, index) => (
                 <Card 
                   key={payment.id} 
-                  className={`border-none ${payment.status === 'paid' ? 'bg-white opacity-60' : 'bg-white'}`}
+                  className={`border-none relative group ${payment.status === 'paid' ? 'bg-white opacity-60' : 'bg-white'}`}
                   onClick={() => handlePaymentClick(selectedClient, payment)}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
@@ -271,9 +302,19 @@ export default function PisoMateApp() {
                         </p>
                       </div>
                     </div>
-                    {payment.status === 'due' && (
-                      <Badge variant="outline" className="text-accent border-accent">Log</Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {payment.status === 'due' && (
+                        <Badge variant="outline" className="text-accent border-accent">Log</Badge>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                        onClick={(e) => handleDeletePayment(payment.id, e)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
