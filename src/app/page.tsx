@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Plus, Trash2, ArrowLeft, Download, Info, Sparkles, ChevronRight, CheckCircle2, Circle } from "lucide-react"
+import { Search, Plus, Trash2, ArrowLeft, Download, Info, ChevronRight, CheckCircle2, Circle } from "lucide-react"
 import { db } from "@/lib/db"
 import { Client, PaymentEntry } from "@/lib/types"
 import { Currency } from "@/components/ui/currency"
@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { AddClientModal } from "@/components/add-client-modal"
 import { PaymentLogModal } from "@/components/payment-log-modal"
-import { AIAdvisorModal } from "@/components/ai-advisor-modal"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { v4 as uuidv4 } from 'uuid'
@@ -23,7 +22,6 @@ export default function PisoMateApp() {
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false)
-  const [isAIModalOpen, setIsAIModalOpen] = React.useState(false)
   const [activePayment, setActivePayment] = React.useState<PaymentEntry | null>(null)
   const { toast } = useToast()
 
@@ -108,7 +106,6 @@ export default function PisoMateApp() {
   const handleConfirmPayment = (amount: number, date: string) => {
     if (!selectedClient || !activePayment) return
 
-    // Ensure balance doesn't go below zero
     const finalAmount = Math.min(amount, selectedClient.outstandingBalance)
     
     const updatedPayments = selectedClient.payments.map(p => 
@@ -167,7 +164,7 @@ export default function PisoMateApp() {
             <div className="grid grid-cols-2 gap-4">
               <Card className="bg-white/10 border-none text-primary-foreground">
                 <CardContent className="p-4">
-                  <p className="text-xs font-medium opacity-70 mb-1">Outstanding</p>
+                  <p className="text-xs font-medium opacity-70 mb-1">Outstanding Balance</p>
                   <p className="text-xl font-bold"><Currency amount={totalOutstanding} /></p>
                 </CardContent>
               </Card>
@@ -263,14 +260,6 @@ export default function PisoMateApp() {
                 <Currency amount={selectedClient.totalPaid} className="text-sm text-accent-foreground" />
               </div>
             </div>
-
-            <Button 
-              className="w-full mt-4 bg-primary text-white flex gap-2"
-              onClick={() => setIsAIModalOpen(true)}
-            >
-              <Sparkles className="h-4 w-4" />
-              Collection Advice
-            </Button>
           </header>
 
           <main className="p-6">
@@ -344,12 +333,6 @@ export default function PisoMateApp() {
         onOpenChange={setIsPaymentModalOpen}
         payment={activePayment}
         onConfirm={handleConfirmPayment}
-      />
-
-      <AIAdvisorModal 
-        open={isAIModalOpen}
-        onOpenChange={setIsAIModalOpen}
-        client={selectedClient}
       />
     </div>
   )

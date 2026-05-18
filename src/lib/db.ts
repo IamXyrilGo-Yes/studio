@@ -1,3 +1,4 @@
+
 import { Client, AppData } from './types';
 
 const STORAGE_KEY = 'pisomate_data';
