@@ -28,9 +28,14 @@ export default function PisoMateApp() {
     setClients(db.getData().clients)
   }, [])
 
-  const filteredClients = clients.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredClients = clients
+    .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      const aSettled = a.outstandingBalance <= 0
+      const bSettled = b.outstandingBalance <= 0
+      if (aSettled === bSettled) return 0
+      return aSettled ? 1 : -1
+    })
 
   const totalOutstanding = clients.reduce((acc, c) => acc + c.outstandingBalance, 0)
   const totalCollected = clients.reduce((acc, c) => acc + c.totalPaid, 0)
