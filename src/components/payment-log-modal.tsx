@@ -21,37 +21,32 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { PaymentEntry } from "@/lib/types"
+import { Textarea } from "@/components/ui/textarea"
 
 const formSchema = z.object({
   amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Amount must be positive."),
-  date: z.string().min(1, "Date is required."),
+  notes: z.string().optional(),
 })
 
 interface PaymentLogModalProps {
-  payment: PaymentEntry | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (amount: number, date: string) => void;
+  onConfirm: (amount: number, notes?: string) => void;
+  maxAmount: number;
 }
 
-export function PaymentLogModal({ payment, open, onOpenChange, onConfirm }: PaymentLogModalProps) {
+export function PaymentLogModal({ open, onOpenChange, onConfirm, maxAmount }: PaymentLogModalProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: "",
-      date: new Date().toISOString().split('T')[0],
+      notes: "",
     },
   })
 
-  React.useEffect(() => {
-    if (payment) {
-      form.setValue("amount", payment.amount.toString())
-    }
-  }, [payment, form])
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onConfirm(Number(values.amount), values.date)
+    onConfirm(Number(values.amount), values.notes)
+    form.reset()
     onOpenChange(false)
   }
 
@@ -59,7 +54,7 @@ export function PaymentLogModal({ payment, open, onOpenChange, onConfirm }: Paym
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Log Payment</DialogTitle>
+          <DialogTitle>Custom Payment</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -68,9 +63,9 @@ export function PaymentLogModal({ payment, open, onOpenChange, onConfirm }: Paym
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Amount (₱)</FormLabel>
+                  <FormLabel>Amount (₱)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input type="number" step="any" placeholder={`Max: ${maxAmount.toFixed(2)}`} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,19 +73,19 @@ export function PaymentLogModal({ payment, open, onOpenChange, onConfirm }: Paym
             />
             <FormField
               control={form.control}
-              name="date"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Date</FormLabel>
+                  <FormLabel>Notes (Optional)</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Textarea placeholder="Payment reference, etc." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full h-12 text-lg font-semibold bg-accent hover:bg-accent/90">
-              Confirm Payment
+            <Button type="submit" className="w-full h-12 text-lg font-semibold bg-primary hover:bg-primary/90">
+              Confirm Custom Payment
             </Button>
           </form>
         </Form>

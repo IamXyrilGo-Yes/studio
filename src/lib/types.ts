@@ -1,21 +1,23 @@
-export type PaymentStatus = 'paid' | 'due' | 'overdue';
+export type PaymentType = 'regular' | 'custom';
+export type ClientStatus = 'ongoing' | 'settled';
 
-export interface PaymentEntry {
+export interface PaymentHistoryItem {
   id: string;
   amount: number;
-  status: PaymentStatus;
-  paidAt?: string;
-  dueDate?: string;
+  type: PaymentType;
+  date: string;
+  notes?: string;
 }
 
 export interface Client {
   id: string;
   name: string;
   loanAmount: number;
+  initialBalance: number; // Loan Amount * 1.1
   outstandingBalance: number;
   totalPaid: number;
   notes?: string;
-  payments: PaymentEntry[];
+  history: PaymentHistoryItem[];
   createdAt: string;
 }
 

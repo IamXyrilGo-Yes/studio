@@ -4,7 +4,6 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Plus, X } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from "@/components/ui/button"
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Client, PaymentEntry } from "@/lib/types"
+import { Client } from "@/lib/types"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -50,22 +49,17 @@ export function AddClientModal({ open, onOpenChange, onAdd }: AddClientModalProp
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const loanAmount = Number(values.loanAmount)
-    const paymentAmount = Math.floor(loanAmount / 10)
-    
-    const payments: PaymentEntry[] = Array.from({ length: 10 }).map((_, i) => ({
-      id: uuidv4(),
-      amount: i === 9 ? loanAmount - (paymentAmount * 9) : paymentAmount,
-      status: 'due',
-    }))
+    const initialBalance = loanAmount * 1.1
 
     const newClient: Client = {
       id: uuidv4(),
       name: values.name,
       loanAmount,
-      outstandingBalance: loanAmount,
+      initialBalance,
+      outstandingBalance: initialBalance,
       totalPaid: 0,
       notes: values.notes,
-      payments,
+      history: [],
       createdAt: new Date().toISOString(),
     }
 
@@ -104,6 +98,9 @@ export function AddClientModal({ open, onOpenChange, onAdd }: AddClientModalProp
                   <FormControl>
                     <Input type="number" placeholder="1000" {...field} />
                   </FormControl>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Initial Balance with 10% Interest: ₱{(Number(field.value) * 1.1).toFixed(2)}
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
