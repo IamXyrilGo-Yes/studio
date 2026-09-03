@@ -90,8 +90,6 @@ export default function CXLoanTracker() {
   
   const { toast } = useToast()
 
-  const logoImage = PlaceHolderImages.find(img => img.id === "app-logo")
-
   React.useEffect(() => {
     const data = db.getData()
     const repairedClients = data.clients.map(c => ({
@@ -314,22 +312,9 @@ export default function CXLoanTracker() {
         <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <header className="p-6 bg-primary text-primary-foreground sticky top-0 z-10 shadow-md">
             <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                {logoImage && (
-                  <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white/20">
-                    <NextImage 
-                      src={logoImage.imageUrl} 
-                      alt="CX Logo" 
-                      fill 
-                      className="object-contain"
-                      data-ai-hint={logoImage.imageHint}
-                    />
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <h1 className="text-2xl font-bold tracking-tight">CX Loan Tracker</h1>
-                  <p className="text-[10px] font-medium opacity-90 mt-0.5">Manage Your Clients & Loan History</p>
-                </div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-bold tracking-tight">CX Loan Tracker</h1>
+                <p className="text-[10px] font-medium opacity-90 mt-0.5">Manage Your Clients & Loan History</p>
               </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-6 w-6" />
@@ -736,17 +721,6 @@ export default function CXLoanTracker() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4 mb-2">
-                  {logoImage && (
-                    <div className="relative h-12 w-12 overflow-hidden rounded-lg">
-                      <NextImage 
-                        src={logoImage.imageUrl} 
-                        alt="CX Logo" 
-                        fill 
-                        className="object-contain"
-                        data-ai-hint={logoImage.imageHint}
-                      />
-                    </div>
-                  )}
                   <div className="space-y-1">
                     <h3 className="font-bold text-base">CX Loan Tracker</h3>
                     <p className="text-xs font-semibold text-primary">Your client tracking and management partner</p>

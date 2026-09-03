@@ -43,6 +43,12 @@ Follow these steps **after** running the `npm` commands above:
    - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
    - Once done, a notification will appear. Click **Locate** to find `app-debug.apk`.
 
+### Important Note on App Icon:
+To update the app icon with your PNG:
+1. Open the `android/` folder in Android Studio.
+2. Right-click the `app` folder and select **New > Image Asset**.
+3. Select your PNG file and follow the wizard.
+
 ---
 
 ## 3. Important Runtime Notes
