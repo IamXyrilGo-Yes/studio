@@ -1,24 +1,16 @@
 include ':app'
 
-// This links the Capacitor Android library from your node_modules
-include ':capacitor-android'
-project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
+rootProject.name = "android"
 
-// This dynamically includes any Capacitor plugins you have installed
-def plugins = []
-def inputFile = new File("../package.json")
-def packageJson = new groovy.json.JsonSlurper().parseText(inputFile.text)
-packageJson.dependencies.each { name, version ->
-    if (name.startsWith("@capacitor/") || name.startsWith("capacitor-")) {
-        def pluginDir = new File("../node_modules/${name}/android")
-        if (pluginDir.exists()) {
-            plugins.add([name: name, path: "../node_modules/${name}/android"])
-        }
-    }
+// Manually include the Capacitor Android library from node_modules
+def capacitorDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
+if (capacitorDir.exists()) {
+    include ':capacitor-android'
+    project(':capacitor-android').projectDir = capacitorDir
 }
 
-plugins.each { plugin ->
-    def pluginProjectName = ":${plugin.name.replace('/', '-').replace('@', '')}"
-    include pluginProjectName
-    project(pluginProjectName).projectDir = new File(plugin.path)
+// This block helps discover Capacitor plugins if the standard apply-from fails
+def pluginDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor/plugin.gradle')
+if (pluginDir.exists()) {
+    apply from: pluginDir
 }
