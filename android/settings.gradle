@@ -1,11 +1,15 @@
-
 // This file is used by Gradle to resolve project dependencies.
 // The ':capacitor-android' project is the library that bridges your web code to Android.
 
 include ':app'
+include ':capacitor-android'
+include ':capacitor-app'
+include ':capacitor-cordova-android-plugins'
 
 // Point directly to the Capacitor Android library in your node_modules
 project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
+project(':capacitor-app').projectDir = new File(settingsDir, '../node_modules/@capacitor/app/android')
+project(':capacitor-cordova-android-plugins').projectDir = new File(settingsDir, 'capacitor-cordova-android-plugins')
 
 // Auto-include any other Capacitor plugins you have installed
 def pluginsDir = new File(settingsDir, '../node_modules')
