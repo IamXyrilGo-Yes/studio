@@ -1,24 +1,26 @@
-
 import { Client, AppData } from './types';
 
 const STORAGE_KEY = 'pisomate_data';
+const CURRENT_VERSION = 2;
 
 export const db = {
   getData: (): AppData => {
-    if (typeof window === 'undefined') return { clients: [] };
+    if (typeof window === 'undefined') return { clients: [], version: CURRENT_VERSION };
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { clients: [] };
+    if (!raw) return { clients: [], version: CURRENT_VERSION };
     try {
-      return JSON.parse(raw);
+      const data = JSON.parse(raw);
+      // Basic migration/repair logic could go here if version changes
+      return data;
     } catch (e) {
       console.error('Failed to parse storage', e);
-      return { clients: [] };
+      return { clients: [], version: CURRENT_VERSION };
     }
   },
 
   saveData: (data: AppData) => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, version: CURRENT_VERSION }));
   },
 
   addClient: (client: Client) => {
@@ -42,9 +44,19 @@ export const db = {
     db.saveData(data);
   },
 
+  clearAllData: () => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORAGE_KEY);
+  },
+
   exportData: () => {
     const data = db.getData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const exportData = {
+      ...data,
+      exportDate: new Date().toISOString(),
+      appName: 'PisoMate'
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -53,5 +65,20 @@ export const db = {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  },
+
+  importData: async (file: File): Promise<boolean> => {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data && Array.isArray(data.clients)) {
+        db.saveData({ clients: data.clients, settings: data.settings, version: CURRENT_VERSION });
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Import failed', e);
+      return false;
+    }
   }
 };
