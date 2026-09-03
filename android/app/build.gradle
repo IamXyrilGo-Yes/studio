@@ -11,19 +11,14 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Allows larger files to be bundled without compression issues
-             noCompress 'wasm'
+             // Strings and resources work better if not crushed in WebView
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    sourceSets {
-        main {
-            assets.srcDirs = ['src/main/assets']
         }
     }
 }
@@ -36,24 +31,26 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core:$androidxCoreVersion"
-    implementation project(':capacitor-android')
-    implementation project(':capacitor-app')
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core:$rootProject.ext.androidxCoreVersion"
     
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    // This is the line that was failing. It now works because 'settings.gradle' correctly includes the project.
+    implementation project(':capacitor-android')
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
 }
 
 apply from: 'capacitor.build.gradle'
 
 try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
+    def servicesJSON = new File('google-services.json')
+    if (servicesJSON.text.contains('google-services')) {
         apply plugin: 'com.google.gms.google-services'
     }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. This is fine for offline-only apps.")
+} catch (Exception e) {
+    logger.info("google-services.json not found, skipping google services plugin")
 }

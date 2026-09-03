@@ -1,16 +1,13 @@
 include ':app'
 
-rootProject.name = "android"
+// Standard Capacitor 7 inclusion method. 
+// This script automatically includes ':capacitor-android' and all installed Capacitor plugins.
+def capacitorSettings = new File(settingsDir, '../node_modules/@capacitor/android/capacitor/capacitor.settings.gradle')
 
-// Manually include the Capacitor Android library from node_modules
-def capacitorDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
-if (capacitorDir.exists()) {
+if (capacitorSettings.exists()) {
+    apply from: capacitorSettings
+} else {
+    // Manual fallback if the script is not found (though npm install should provide it)
     include ':capacitor-android'
-    project(':capacitor-android').projectDir = capacitorDir
-}
-
-// This block helps discover Capacitor plugins if the standard apply-from fails
-def pluginDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor/plugin.gradle')
-if (pluginDir.exists()) {
-    apply from: pluginDir
+    project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
 }
