@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -20,6 +21,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { v4 as uuidv4 } from 'uuid'
 import { format, isBefore, startOfDay } from "date-fns"
+import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +58,6 @@ function getClientStats(client: Client) {
   
   const progress = Math.min(100, (totalPaid / totalRepayment) * 100)
   
-  // Interest allocation: Interest is considered paid off first in this logic
   const interestAmount = client.initialBalance - client.loanAmount
   const interestCollected = Math.min(interestAmount, totalPaid)
   
@@ -88,7 +90,6 @@ export default function XyLoanApp() {
 
   React.useEffect(() => {
     const data = db.getData()
-    // Automatic repair: ensure all clients have valid history and interest rates
     const repairedClients = data.clients.map(c => ({
       ...c,
       interestRate: c.interestRate ?? 10,
@@ -96,9 +97,27 @@ export default function XyLoanApp() {
       history: c.history ?? []
     }))
     setClients(repairedClients)
-  }, [])
 
-  // Derived statistics for the dashboard
+    // Handle Android Hardware Back Button
+    if (Capacitor.isNativePlatform()) {
+      const backListener = App.addListener('backButton', () => {
+        if (isAddModalOpen) setIsAddModalOpen(false)
+        else if (isCustomPaymentModalOpen) setIsCustomPaymentModalOpen(false)
+        else if (editingPayment) setEditingPayment(null)
+        else if (deleteConfirm) setDeleteConfirm(null)
+        else if (selectedClient) setSelectedClient(null)
+        else if (isSettingsOpen) setIsSettingsOpen(false)
+        else {
+          App.exitApp()
+        }
+      })
+
+      return () => {
+        backListener.then(l => l.remove())
+      }
+    }
+  }, [isAddModalOpen, isCustomPaymentModalOpen, editingPayment, deleteConfirm, selectedClient, isSettingsOpen])
+
   const stats = React.useMemo(() => {
     return clients.reduce((acc, client) => {
       const s = getClientStats(client)
@@ -140,10 +159,10 @@ export default function XyLoanApp() {
       const sB = getClientStats(b)
 
       switch (sortBy) {
-        case 'name_asc': return a.name.localeCompare(b.name)
-        case 'name_desc': return b.name.localeCompare(a.name)
         case 'balance_desc': return sB.remainingBalance - sA.remainingBalance
         case 'balance_asc': return sA.remainingBalance - sB.remainingBalance
+        case 'name_asc': return a.name.localeCompare(b.name)
+        case 'name_desc': return b.name.localeCompare(a.name)
         case 'newest': return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         case 'oldest': return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         case 'recent_payment': 
@@ -187,11 +206,9 @@ export default function XyLoanApp() {
 
   const handleRegularPayment = () => {
     if (!selectedClient) return
-    
     const s = getClientStats(selectedClient)
     if (s.isSettled) return
 
-    // Formula: Regular Payment = (Loan Amount * (1+Rate)) / 22
     const regularAmount = selectedClient.initialBalance / 22
     const finalAmount = Math.min(regularAmount, s.remainingBalance)
     
@@ -216,11 +233,9 @@ export default function XyLoanApp() {
 
   const handlePaymentConfirm = (amount: number, notes?: string, id?: string) => {
     if (!selectedClient) return
-    
     const s = getClientStats(selectedClient)
     
     if (id) {
-      // Edit existing
       const updatedHistory = selectedClient.history.map(p => 
         p.id === id ? { ...p, amount, notes, date: p.date } : p
       )
@@ -228,7 +243,6 @@ export default function XyLoanApp() {
       updateClientState(updatedClient)
       toast({ title: "Payment updated" })
     } else {
-      // New custom
       if (s.isSettled) return
       const finalAmount = Math.min(amount, s.remainingBalance)
       const historyItem: PaymentHistoryItem = {
@@ -287,7 +301,6 @@ export default function XyLoanApp() {
     <div className="mobile-container pb-24">
       <Toaster />
       
-      {/* Dashboard View */}
       {!selectedClient && !isSettingsOpen && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <header className="p-6 bg-primary text-primary-foreground sticky top-0 z-10 shadow-md">
@@ -295,7 +308,7 @@ export default function XyLoanApp() {
               <div className="flex flex-col">
                 <h1 className="text-2xl font-bold tracking-tight">Xy Loan</h1>
                 <p className="text-[10px] font-medium opacity-90 mt-0.5">Private Loan & Payment Tracker</p>
-                <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[200px]">
+                <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[220px]">
                   A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
                 </p>
               </div>
@@ -332,10 +345,10 @@ export default function XyLoanApp() {
             </div>
 
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <Badge className="bg-white/20 hover:bg-white/30 text-[10px]">Lent: ₱{stats.totalLent.toLocaleString()}</Badge>
-              <Badge className="bg-white/20 hover:bg-white/30 text-[10px]">Int. Collected: ₱{stats.interestCollected.toLocaleString()}</Badge>
-              <Badge className="bg-white/20 hover:bg-white/30 text-[10px]">Active: {stats.totalOngoing}</Badge>
-              <Badge className="bg-white/20 hover:bg-white/30 text-[10px]">Overdue: {stats.totalOverdue}</Badge>
+              <Badge className="bg-white/20 hover:bg-white/30 text-[10px] whitespace-nowrap">Int. Collected: ₱{stats.interestCollected.toLocaleString()}</Badge>
+              <Badge className="bg-white/20 hover:bg-white/30 text-[10px] whitespace-nowrap">Active: {stats.totalOngoing}</Badge>
+              <Badge className="bg-white/20 hover:bg-white/30 text-[10px] whitespace-nowrap">Overdue: {stats.totalOverdue}</Badge>
+              <Badge className="bg-white/20 hover:bg-white/30 text-[10px] whitespace-nowrap">Settled: {stats.totalSettled}</Badge>
             </div>
           </header>
 
@@ -354,10 +367,10 @@ export default function XyLoanApp() {
               <div className="flex flex-col gap-3">
                 <Tabs value={filter} onValueChange={setFilter} className="w-full">
                   <TabsList className="grid grid-cols-4 w-full h-10">
-                    <TabsTrigger value="all" className="text-[10px]">All ({clients.length})</TabsTrigger>
-                    <TabsTrigger value="ongoing" className="text-[10px]">Ongoing ({stats.totalOngoing})</TabsTrigger>
-                    <TabsTrigger value="settled" className="text-[10px]">Settled ({stats.totalSettled})</TabsTrigger>
-                    <TabsTrigger value="overdue" className="text-[10px]">Overdue ({stats.totalOverdue})</TabsTrigger>
+                    <TabsTrigger value="all" className="text-[10px]">All</TabsTrigger>
+                    <TabsTrigger value="ongoing" className="text-[10px]">Ongoing</TabsTrigger>
+                    <TabsTrigger value="settled" className="text-[10px]">Settled</TabsTrigger>
+                    <TabsTrigger value="overdue" className="text-[10px]">Overdue</TabsTrigger>
                   </TabsList>
                 </Tabs>
 
@@ -382,9 +395,6 @@ export default function XyLoanApp() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {filter.toUpperCase()} CLIENTS ({filteredAndSortedClients.length})
-              </h2>
               {filteredAndSortedClients.length > 0 ? (
                 filteredAndSortedClients.map(client => {
                   const s = getClientStats(client)
@@ -397,15 +407,15 @@ export default function XyLoanApp() {
                       <CardContent className="p-0">
                         <div className="p-5">
                           <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-bold text-lg">{client.name}</h3>
+                            <div className="max-w-[80%]">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <h3 className="font-bold text-lg truncate">{client.name}</h3>
                                 {s.isSettled ? (
-                                  <Badge className="bg-green-500 hover:bg-green-500">Settled</Badge>
+                                  <Badge className="bg-green-500 hover:bg-green-500 h-5 px-1.5 text-[9px]">Settled</Badge>
                                 ) : s.isOverdue ? (
-                                  <Badge variant="destructive" className="animate-pulse">Overdue</Badge>
+                                  <Badge variant="destructive" className="animate-pulse h-5 px-1.5 text-[9px]">Overdue</Badge>
                                 ) : (
-                                  <Badge variant="outline" className="text-orange-500 border-orange-500">Ongoing</Badge>
+                                  <Badge variant="outline" className="text-orange-500 border-orange-500 h-5 px-1.5 text-[9px]">Ongoing</Badge>
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground">
@@ -440,42 +450,41 @@ export default function XyLoanApp() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground bg-white/50 rounded-xl border-2 border-dashed">
                   <Info className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                  <p className="text-sm">No clients match your criteria.</p>
+                  <p className="text-sm">No loans match your criteria.</p>
                 </div>
               )}
             </div>
           </main>
 
           <Button 
-            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 p-0"
+            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 p-0 z-50"
             onClick={() => setIsAddModalOpen(true)}
           >
-            <Plus className="h-8 w-8" />
+            <Plus className="h-8 w-8 text-white" />
           </Button>
         </div>
       )}
 
-      {/* Client Detail View */}
       {selectedClient && selectedClientStats && (
         <div className="animate-in fade-in slide-in-from-left-4 duration-300 bg-background min-h-screen">
           <header className="p-6 bg-white border-b sticky top-0 z-20">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 max-w-full overflow-hidden">
                 <Button variant="ghost" size="icon" onClick={() => setSelectedClient(null)}>
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <h1 className="text-xl font-bold truncate">{selectedClient.name}</h1>
-                  <div className="flex gap-2 items-center mt-1">
+                  <div className="flex gap-2 items-center mt-1 flex-wrap">
                     {selectedClientStats.isSettled ? (
-                      <Badge className="bg-green-500">Settled</Badge>
+                      <Badge className="bg-green-500 text-[10px]">Settled</Badge>
                     ) : selectedClientStats.isOverdue ? (
-                      <Badge variant="destructive">Overdue</Badge>
+                      <Badge variant="destructive" className="text-[10px]">Overdue</Badge>
                     ) : (
-                      <Badge variant="outline" className="text-orange-500 border-orange-500">Ongoing</Badge>
+                      <Badge variant="outline" className="text-orange-500 border-orange-500 text-[10px]">Ongoing</Badge>
                     )}
                     {selectedClient.dueDate && !selectedClientStats.isSettled && (
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 whitespace-nowrap">
                         <Calendar className="h-3 w-3" />
                         {selectedClientStats.isOverdue 
                           ? `${Math.abs(Math.floor((new Date().getTime() - new Date(selectedClient.dueDate).getTime()) / (1000 * 60 * 60 * 24)))} days overdue`
@@ -499,7 +508,7 @@ export default function XyLoanApp() {
                   <Currency amount={selectedClientStats.interestAmount} className="text-sm font-bold text-destructive" />
                 </div>
                 <div className="p-3 bg-primary/10 rounded-lg">
-                  <p className="text-[10px] text-primary uppercase mb-1">Total Repayment</p>
+                  <p className="text-[10px] text-primary uppercase mb-1">Repayment Target</p>
                   <Currency amount={selectedClientStats.totalRepayment} className="text-sm font-bold text-primary" />
                 </div>
                 <div className="p-3 bg-accent/10 rounded-lg">
@@ -510,13 +519,13 @@ export default function XyLoanApp() {
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold text-primary">
-                  <span>Progress</span>
+                  <span>Collection Progress</span>
                   <span>{selectedClientStats.progress.toFixed(1)}%</span>
                 </div>
                 <Progress value={selectedClientStats.progress} className="h-2" />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
                   <span>₱{selectedClientStats.totalPaid.toLocaleString()} paid</span>
-                  <span>₱{selectedClientStats.remainingBalance.toLocaleString()} remaining</span>
+                  <span>₱{selectedClientStats.remainingBalance.toLocaleString()} left</span>
                 </div>
               </div>
 
@@ -550,48 +559,37 @@ export default function XyLoanApp() {
             </div>
 
             <div className="space-y-4 relative">
-              {/* Vertical line for timeline */}
               {selectedClient.history.length > 0 && (
                 <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-muted z-0" />
               )}
 
               {selectedClient.history.length > 0 ? (
-                selectedClient.history.map((item, index) => (
+                selectedClient.history.map((item) => (
                   <div key={item.id} className="relative z-10 flex gap-4">
                     <div className="h-10 w-10 rounded-full bg-white border-2 border-primary/20 flex items-center justify-center shrink-0">
                       <TrendingUp className="h-5 w-5 text-primary" />
                     </div>
-                    <Card className="flex-1 border-none shadow-sm bg-white">
+                    <Card className="flex-1 border-none shadow-sm bg-white overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <Currency amount={item.amount} className="text-lg font-bold" />
-                              <Badge variant="secondary" className="text-[10px] uppercase px-1">
+                              <Badge variant="secondary" className="text-[8px] uppercase px-1 h-4">
                                 {item.type}
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {format(new Date(item.date), 'MMM dd, yyyy')}</span>
+                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
+                              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {format(new Date(item.date), 'MMM dd')}</span>
                               <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {format(new Date(item.date), 'hh:mm a')}</span>
                             </div>
-                            {item.notes && <p className="text-xs italic mt-2 text-muted-foreground border-l-2 border-primary/20 pl-2">"{item.notes}"</p>}
+                            {item.notes && <p className="text-xs italic mt-2 text-muted-foreground border-l-2 border-primary/20 pl-2 break-words">"{item.notes}"</p>}
                           </div>
                           <div className="flex gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-muted-foreground"
-                              onClick={() => setEditingPayment(item)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setEditingPayment(item)}>
                               <Edit2 className="h-3 w-3" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                              onClick={() => setDeleteConfirm({ type: 'payment', id: item.id })}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteConfirm({ type: 'payment', id: item.id })}>
                               <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
@@ -611,7 +609,7 @@ export default function XyLoanApp() {
                   <CheckCircle2 className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 py-2">
-                  <p className="text-sm font-bold">Loan Started</p>
+                  <p className="text-sm font-bold">Loan Created</p>
                   <p className="text-[10px] text-muted-foreground">{format(new Date(selectedClient.createdAt), 'MMM dd, yyyy')}</p>
                 </div>
               </div>
@@ -623,19 +621,19 @@ export default function XyLoanApp() {
                   <CardContent className="p-4 space-y-4">
                     {selectedClient.phone && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Contact</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Contact Number</h3>
                         <p className="text-sm">{selectedClient.phone}</p>
                       </div>
                     )}
                     {selectedClient.address && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Address</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Home Address</h3>
                         <p className="text-sm">{selectedClient.address}</p>
                       </div>
                     )}
                     {selectedClient.notes && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Loan Notes</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Loan Remarks</h3>
                         <p className="text-sm italic">{selectedClient.notes}</p>
                       </div>
                     )}
@@ -645,10 +643,10 @@ export default function XyLoanApp() {
             )}
 
             <div className="mt-8 p-4 bg-primary/5 rounded-lg border border-primary/10 space-y-3">
-              <h3 className="text-xs font-bold uppercase text-primary">Repayment Analytics</h3>
+              <h3 className="text-xs font-bold uppercase text-primary">Loan Summary</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Avg Payment</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">Average Payment</p>
                   <p className="text-sm font-bold">
                     ₱{selectedClient.history.length > 0 
                       ? (selectedClientStats.totalPaid / selectedClient.history.length).toFixed(2) 
@@ -656,7 +654,7 @@ export default function XyLoanApp() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Last Payment</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">Last Transaction</p>
                   <p className="text-sm font-bold">
                     {selectedClient.history[0] ? format(new Date(selectedClient.history[0].date), 'MMM dd') : 'N/A'}
                   </p>
@@ -667,7 +665,6 @@ export default function XyLoanApp() {
         </div>
       )}
 
-      {/* Settings View */}
       {isSettingsOpen && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-background min-h-screen">
           <header className="p-6 bg-white border-b sticky top-0 z-20">
@@ -682,7 +679,7 @@ export default function XyLoanApp() {
           <main className="p-6 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-bold">Data Management</CardTitle>
+                <CardTitle className="text-sm font-bold">Database Management</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col gap-2">
@@ -708,7 +705,7 @@ export default function XyLoanApp() {
                     className="w-full justify-start gap-2" 
                     onClick={() => setDeleteConfirm({ type: 'client', id: 'ALL_DATA' })}
                   >
-                    <AlertTriangle className="h-4 w-4" /> Clear All Data
+                    <AlertTriangle className="h-4 w-4" /> Clear All Local Data
                   </Button>
                 </div>
               </CardContent>
@@ -732,7 +729,7 @@ export default function XyLoanApp() {
                 </div>
                 <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
                   <p className="text-[10px] text-primary leading-tight">
-                    <strong>Note:</strong> Your loan records are stored locally on this device. Use "Export Data" to create backups.
+                    <strong>Local-Only Storage:</strong> Your loan records are stored locally on this device. No cloud sync or external servers are used. Please use "Export Data" regularly to create manual backups.
                   </p>
                 </div>
               </CardContent>
@@ -741,7 +738,6 @@ export default function XyLoanApp() {
         </div>
       )}
 
-      {/* Modals & Dialogs */}
       <AddClientModal 
         open={isAddModalOpen} 
         onOpenChange={setIsAddModalOpen} 
@@ -762,29 +758,29 @@ export default function XyLoanApp() {
       />
 
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[90%] rounded-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteConfirm?.id === 'ALL_DATA' 
-                ? "This will PERMANENTLY delete all clients, loans, and payments. This action cannot be undone."
+                ? "This will PERMANENTLY delete all loan records on this device. This cannot be undone."
                 : deleteConfirm?.type === 'client' 
-                  ? "This will delete the client and all associated loan history. This action cannot be undone."
-                  : "This payment will be removed and the loan balance will be restored."
+                  ? "This will delete the client and all their transaction history."
+                  : "This payment will be removed and the balance will be restored."
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-row gap-2 mt-4">
+            <AlertDialogCancel className="flex-1 mt-0">Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              className="bg-destructive hover:bg-destructive/90"
+              className="flex-1 bg-destructive hover:bg-destructive/90"
               onClick={() => {
                 if (deleteConfirm?.id === 'ALL_DATA') handleClearAll()
                 else if (deleteConfirm?.type === 'client') handleDeleteClient(deleteConfirm.id)
                 else if (deleteConfirm?.type === 'payment') handleDeleteHistoryItem(deleteConfirm.id)
               }}
             >
-              Delete
+              Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

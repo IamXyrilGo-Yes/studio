@@ -1,48 +1,59 @@
-# Xy Loan Android App
 
-Private Loan & Payment Tracker - A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
+# Xy Loan - Android Deployment Report
 
-## Prerequisites
+**Xy Loan** is a private loan and payment tracker designed for local-only, offline-first use. This project has been converted into a self-contained Android application using Capacitor.
 
-1.  **Node.js**: Ensure Node.js is installed.
-2.  **Android Studio**: Required to compile and build the APK.
-3.  **Android SDK**: Ensure you have the latest SDK installed via Android Studio.
+## Final Android Application Report
 
-## Building the APK
+- **Framework**: Next.js 15 (Static Export)
+- **Mobile Engine**: Capacitor 7.0
+- **App Identity**: `com.xyloan.app`
+- **Branding**: Xy Loan - Private Loan & Payment Tracker
+- **Developer**: Xyril Garret Go
+- **Offline Mode**: 100% Functional (Wi-Fi/Data Off compatible)
+- **Data Storage**: `localStorage` (Persistent within Android WebView)
+- **Back Navigation**: Hardware back button integration handled via `@capacitor/app`.
 
-Follow these steps to generate the Android APK:
+## 1. Prerequisites
+- **Node.js**: Installed on your development machine.
+- **Android Studio**: Required to compile and build the APK.
+- **Android SDK**: Latest SDK installed via Android Studio.
 
-1.  **Install dependencies**:
-    The system will automatically install the new Capacitor dependencies.
+## 2. Building the APK
+To generate the static assets and prepare the Android project, follow these steps:
 
-2.  **Initialize Android Platform** (Run this once in your terminal):
-    ```bash
-    npx cap add android
-    ```
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-3.  **Build and Export the App**:
-    Generate the static web files for Capacitor:
-    ```bash
-    npm run android:build
-    ```
-    This command will:
-    - Build the Next.js app (`next build`).
-    - Generate the static export (`out` folder).
-    - Copy the files to the Android project (`npx cap copy`).
-    - Open the project in Android Studio.
+2. **Build and Export the Web App**:
+   Generate the static `out` directory:
+   ```bash
+   npm run export
+   ```
 
-4.  **In Android Studio**:
-    - Wait for Gradle to sync.
-    - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
-    - Android Studio will generate the `.apk` file.
-    - A notification will appear; click **Locate** to find your `app-debug.apk`.
+3. **Sync with Android**:
+   Copy the static files to the Android project:
+   ```bash
+   npx cap copy
+   ```
 
-## Offline Storage
+4. **Open in Android Studio**:
+   ```bash
+   npx cap open android
+   ```
 
-The app uses `localStorage` via `src/lib/db.ts`, which Capacitor persists automatically on the device. All records are stored locally on your device.
+5. **In Android Studio**:
+   - Wait for Gradle to finish syncing.
+   - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+   - Once finished, click **Locate** on the notification to find your `app-debug.apk`.
 
-## Responsive Design
+## 3. Important Notes
+- **Self-Contained**: The APK bundles all HTML, CSS, and JS assets. It does NOT require a server, Node.js, or internet to run.
+- **Single Source of Truth**: All financial calculations are derived dynamically from transaction history.
+- **Local Data**: Data survives app restarts and reboots as it is stored in persistent device-local storage.
+- **Back Button**: The Android hardware back button will close open views or details before exiting the app.
 
-The UI has been optimized for full-width mobile screens and includes support for safe areas (status bars and navigation notches).
-
+---
 Developed by Xyril Garret Go

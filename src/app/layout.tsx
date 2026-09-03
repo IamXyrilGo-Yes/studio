@@ -1,10 +1,11 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Xy Loan | Private Loan & Payment Tracker',
   description: 'A local, offline-first application for securely tracking personal loans, payments, balances, and collections.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
 };
 
 export default function RootLayout({
@@ -20,8 +21,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="font-body antialiased bg-gray-100">
+      <body className="font-body antialiased bg-gray-100 select-none">
         {children}
       </body>
     </html>
