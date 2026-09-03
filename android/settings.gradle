@@ -1,30 +1,16 @@
-// This file is used by Gradle to resolve project dependencies.
-// The ':capacitor-android' project is the library that bridges your web code to Android.
-
 include ':app'
-include ':capacitor-android'
-include ':capacitor-app'
-include ':capacitor-cordova-android-plugins'
 
-// Point directly to the Capacitor Android library in your node_modules
+// This is the critical manual resolution for the Capacitor Android project
+// It allows Gradle to find the native bridge code in your node_modules
 project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
-project(':capacitor-app').projectDir = new File(settingsDir, '../node_modules/@capacitor/app/android')
-project(':capacitor-cordova-android-plugins').projectDir = new File(settingsDir, 'capacitor-cordova-android-plugins')
 
-// Auto-include any other Capacitor plugins you have installed
-def pluginsDir = new File(settingsDir, '../node_modules')
-if (pluginsDir.exists()) {
-    pluginsDir.eachDir { dir ->
-        def pluginGradle = new File(dir, 'package.json')
-        if (pluginGradle.exists()) {
-            def name = dir.name
-            // Skip the core android library as we included it manually above
-            if (name != 'android') {
-                def capacitorPlugin = new File(dir, "${name}.gradle")
-                if (capacitorPlugin.exists()) {
-                    // This is a Capacitor plugin, include it if necessary
-                }
-            }
-        }
+// Auto-include Capacitor plugins from node_modules
+def localProperties = new Properties()
+def localPropertiesFile = new File(settingsDir, 'local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
     }
 }
+
+apply from: '../node_modules/@capacitor/android/capacitor/capacitor.settings.gradle'

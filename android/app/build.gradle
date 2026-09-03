@@ -48,7 +48,6 @@ dependencies {
     
     // This is the critical link to the Capacitor library
     implementation project(':capacitor-android')
-    implementation project(':capacitor-app')
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
@@ -57,11 +56,11 @@ dependencies {
 
 try {
     def servicesJSON = file('google-services.json')
-    if (servicesJSON.exists()) {
+    if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied.")
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
 
 apply from: 'capacitor.build.gradle'
