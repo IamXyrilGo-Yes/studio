@@ -2,8 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'PisoMate | Smart Loan Tracker PH',
-  description: 'Simple and clean loan tracking for small lending businesses in the Philippines.',
+  title: 'Xy Loan | Private Loan & Payment Tracker',
+  description: 'A local, offline-first application for securely tracking personal loans, payments, balances, and collections.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
 };
 

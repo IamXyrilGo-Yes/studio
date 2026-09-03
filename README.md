@@ -1,7 +1,6 @@
+# Xy Loan Android App
 
-# PisoMate Android App
-
-This project is a Next.js application converted into a mobile Android app using Capacitor.
+Private Loan & Payment Tracker - A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
 
 ## Prerequisites
 
@@ -40,8 +39,10 @@ Follow these steps to generate the Android APK:
 
 ## Offline Storage
 
-The app uses `localStorage` via `src/lib/db.ts`, which Capacitor persists automatically on the device.
+The app uses `localStorage` via `src/lib/db.ts`, which Capacitor persists automatically on the device. All records are stored locally on your device.
 
 ## Responsive Design
 
 The UI has been optimized for full-width mobile screens and includes support for safe areas (status bars and navigation notches).
+
+Developed by Xyril Garret Go

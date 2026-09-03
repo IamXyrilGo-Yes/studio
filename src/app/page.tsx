@@ -72,7 +72,7 @@ function getClientStats(client: Client) {
   }
 }
 
-export default function PisoMateApp() {
+export default function XyLoanApp() {
   const [clients, setClients] = React.useState<Client[]>([])
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filter, setFilter] = React.useState("all")
@@ -291,8 +291,14 @@ export default function PisoMateApp() {
       {!selectedClient && !isSettingsOpen && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <header className="p-6 bg-primary text-primary-foreground sticky top-0 z-10 shadow-md">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold tracking-tight">PisoMate</h1>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-bold tracking-tight">Xy Loan</h1>
+                <p className="text-[10px] font-medium opacity-90 mt-0.5">Private Loan & Payment Tracker</p>
+                <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[200px]">
+                  A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
+                </p>
+              </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-6 w-6" />
               </Button>
@@ -710,12 +716,25 @@ export default function PisoMateApp() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-bold">App Info</CardTitle>
+                <CardTitle className="text-sm font-bold">About Xy Loan</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
-                <p>PisoMate v2.0</p>
-                <p>Local Lending Tracker PH</p>
-                <p className="mt-2">All your data is stored locally on this device. Use Export to backup your records.</p>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="font-bold text-base">Xy Loan</h3>
+                  <p className="text-xs font-semibold text-primary">Private Loan & Payment Tracker</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
+                </p>
+                <div className="pt-2">
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Developed by</p>
+                  <p className="text-sm font-bold">Xyril Garret Go</p>
+                </div>
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
+                  <p className="text-[10px] text-primary leading-tight">
+                    <strong>Note:</strong> Your loan records are stored locally on this device. Use "Export Data" to create backups.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </main>
