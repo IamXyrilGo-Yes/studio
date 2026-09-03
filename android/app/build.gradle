@@ -1,3 +1,4 @@
+
 apply plugin: 'com.android.application'
 
 android {
@@ -11,7 +12,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Strings and resources work better if not crushed in WebView
+             // Strings should not be compressed, as this can cause issues with bundling
              ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
@@ -19,6 +20,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/LIST']
         }
     }
 }
@@ -35,22 +41,17 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core:$rootProject.ext.androidxCoreVersion"
     
-    // This is the line that was failing. It now works because 'settings.gradle' correctly includes the project.
+    // This is the critical link to the Capacitor library
     implementation project(':capacitor-android')
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
-    implementation project(':capacitor-cordova-android-plugins')
 }
 
-apply from: 'capacitor.build.gradle'
-
-try {
-    def servicesJSON = new File('google-services.json')
-    if (servicesJSON.text.contains('google-services')) {
-        apply plugin: 'com.google.gms.google-services'
+// Map the web assets to the APK
+sourceSets {
+    main {
+        assets.srcDirs = ['src/main/assets']
     }
-} catch (Exception e) {
-    logger.info("google-services.json not found, skipping google services plugin")
 }

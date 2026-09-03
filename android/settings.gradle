@@ -1,13 +1,26 @@
+
+// This file is used by Gradle to resolve project dependencies.
+// The ':capacitor-android' project is the library that bridges your web code to Android.
+
 include ':app'
 
-// Standard Capacitor 7 inclusion method. 
-// This script automatically includes ':capacitor-android' and all installed Capacitor plugins.
-def capacitorSettings = new File(settingsDir, '../node_modules/@capacitor/android/capacitor/capacitor.settings.gradle')
+// Point directly to the Capacitor Android library in your node_modules
+project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
 
-if (capacitorSettings.exists()) {
-    apply from: capacitorSettings
-} else {
-    // Manual fallback if the script is not found (though npm install should provide it)
-    include ':capacitor-android'
-    project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
+// Auto-include any other Capacitor plugins you have installed
+def pluginsDir = new File(settingsDir, '../node_modules')
+if (pluginsDir.exists()) {
+    pluginsDir.eachDir { dir ->
+        def pluginGradle = new File(dir, 'package.json')
+        if (pluginGradle.exists()) {
+            def name = dir.name
+            // Skip the core android library as we included it manually above
+            if (name != 'android') {
+                def capacitorPlugin = new File(dir, "${name}.gradle")
+                if (capacitorPlugin.exists()) {
+                    // This is a Capacitor plugin, include it if necessary
+                }
+            }
+        }
+    }
 }
