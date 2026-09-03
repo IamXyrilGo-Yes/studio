@@ -3,8 +3,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Xy Loan Management',
-  description: 'A private application for tracking personal loans, payments, balances, and collections.',
+  title: 'CX Loan Tracker',
+  description: 'An app for tracking clients who loaned to you or you lend money to. Manage balances and payment history effortlessly.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
 };
 

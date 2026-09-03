@@ -4,7 +4,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="Xy Loan Management"
+        android:label="CX Loan Tracker"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity

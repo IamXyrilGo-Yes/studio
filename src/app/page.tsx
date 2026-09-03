@@ -2,6 +2,7 @@
 "use client"
 
 import * as React from "react"
+import NextImage from "next/image"
 import { 
   Search, Plus, Trash2, ArrowLeft, ChevronRight, History, Calendar, 
   PhilippinePeso, Clock, Filter, Settings, Download, Upload, 
@@ -23,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { format, isBefore, startOfDay } from "date-fns"
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
+import { PlaceHolderImages } from "@/lib/placeholder-images"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,7 +76,7 @@ function getClientStats(client: Client) {
   }
 }
 
-export default function XyLoanApp() {
+export default function CXLoanTracker() {
   const [clients, setClients] = React.useState<Client[]>([])
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filter, setFilter] = React.useState("all")
@@ -87,6 +89,8 @@ export default function XyLoanApp() {
   const [deleteConfirm, setDeleteConfirm] = React.useState<{ type: 'client' | 'payment', id: string } | null>(null)
   
   const { toast } = useToast()
+
+  const logoImage = PlaceHolderImages.find(img => img.id === "app-logo")
 
   React.useEffect(() => {
     const data = db.getData()
@@ -310,12 +314,22 @@ export default function XyLoanApp() {
         <div className="animate-in fade-in slide-in-from-right-4 duration-300">
           <header className="p-6 bg-primary text-primary-foreground sticky top-0 z-10 shadow-md">
             <div className="flex justify-between items-center mb-4">
-              <div className="flex flex-col">
-                <h1 className="text-2xl font-bold tracking-tight">Xy Loan Management</h1>
-                <p className="text-[10px] font-medium opacity-90 mt-0.5">Personal Loan & Payment Tracking</p>
-                <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[220px]">
-                  A private application for tracking personal loans, payments, balances, and collections.
-                </p>
+              <div className="flex items-center gap-3">
+                {logoImage && (
+                  <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white/20">
+                    <NextImage 
+                      src={logoImage.imageUrl} 
+                      alt="CX Logo" 
+                      fill 
+                      className="object-contain"
+                      data-ai-hint={logoImage.imageHint}
+                    />
+                  </div>
+                )}
+                <div className="flex flex-col">
+                  <h1 className="text-2xl font-bold tracking-tight">CX Loan Tracker</h1>
+                  <p className="text-[10px] font-medium opacity-90 mt-0.5">Manage Your Clients & Loan History</p>
+                </div>
               </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-6 w-6" />
@@ -363,7 +377,7 @@ export default function XyLoanApp() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   className="pl-10 h-12 bg-white" 
-                  placeholder="Search name or notes..." 
+                  placeholder="Search client names or notes..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -455,7 +469,7 @@ export default function XyLoanApp() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground bg-white/50 rounded-xl border-2 border-dashed">
                   <Info className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                  <p className="text-sm">No loans match your criteria.</p>
+                  <p className="text-sm">No clients match your search criteria.</p>
                 </div>
               )}
             </div>
@@ -513,24 +527,24 @@ export default function XyLoanApp() {
                   <Currency amount={selectedClientStats.interestAmount} className="text-sm font-bold text-destructive" />
                 </div>
                 <div className="p-3 bg-primary/10 rounded-lg">
-                  <p className="text-[10px] text-primary uppercase mb-1">Repayment Target</p>
+                  <p className="text-[10px] text-primary uppercase mb-1">Total Due</p>
                   <Currency amount={selectedClientStats.totalRepayment} className="text-sm font-bold text-primary" />
                 </div>
                 <div className="p-3 bg-accent/10 rounded-lg">
-                  <p className="text-[10px] text-accent-foreground uppercase mb-1">Total Paid</p>
+                  <p className="text-[10px] text-accent-foreground uppercase mb-1">Paid to Date</p>
                   <Currency amount={selectedClientStats.totalPaid} className="text-sm font-bold text-accent-foreground" />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold text-primary">
-                  <span>Collection Progress</span>
+                  <span>Tracking Progress</span>
                   <span>{selectedClientStats.progress.toFixed(1)}%</span>
                 </div>
                 <Progress value={selectedClientStats.progress} className="h-2" />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
                   <span>₱{selectedClientStats.totalPaid.toLocaleString()} paid</span>
-                  <span>₱{selectedClientStats.remainingBalance.toLocaleString()} left</span>
+                  <span>₱{selectedClientStats.remainingBalance.toLocaleString()} remaining</span>
                 </div>
               </div>
 
@@ -558,9 +572,9 @@ export default function XyLoanApp() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <History className="h-5 w-5 text-muted-foreground" />
-                <h2 className="text-lg font-bold">Timeline</h2>
+                <h2 className="text-lg font-bold">Transaction History</h2>
               </div>
-              <Badge variant="secondary">{selectedClient.history.length} Transactions</Badge>
+              <Badge variant="secondary">{selectedClient.history.length} items</Badge>
             </div>
 
             <div className="space-y-4 relative">
@@ -605,7 +619,7 @@ export default function XyLoanApp() {
                 ))
               ) : (
                 <div className="text-center py-12 text-muted-foreground bg-white/50 rounded-lg border-2 border-dashed">
-                  <p className="text-sm">No payments recorded yet.</p>
+                  <p className="text-sm">No transactions recorded.</p>
                 </div>
               )}
               
@@ -614,7 +628,7 @@ export default function XyLoanApp() {
                   <CheckCircle2 className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 py-2">
-                  <p className="text-sm font-bold">Loan Created</p>
+                  <p className="text-sm font-bold">Client Record Created</p>
                   <p className="text-[10px] text-muted-foreground">{format(new Date(selectedClient.createdAt), 'MMM dd, yyyy')}</p>
                 </div>
               </div>
@@ -626,19 +640,19 @@ export default function XyLoanApp() {
                   <CardContent className="p-4 space-y-4">
                     {selectedClient.phone && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Contact Number</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Contact Information</h3>
                         <p className="text-sm">{selectedClient.phone}</p>
                       </div>
                     )}
                     {selectedClient.address && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Home Address</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Address</h3>
                         <p className="text-sm">{selectedClient.address}</p>
                       </div>
                     )}
                     {selectedClient.notes && (
                       <div>
-                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Loan Remarks</h3>
+                        <h3 className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Additional Notes</h3>
                         <p className="text-sm italic">{selectedClient.notes}</p>
                       </div>
                     )}
@@ -648,10 +662,10 @@ export default function XyLoanApp() {
             )}
 
             <div className="mt-8 p-4 bg-primary/5 rounded-lg border border-primary/10 space-y-3">
-              <h3 className="text-xs font-bold uppercase text-primary">Loan Summary</h3>
+              <h3 className="text-xs font-bold uppercase text-primary">Summary Stats</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Average Payment</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">Average Transaction</p>
                   <p className="text-sm font-bold">
                     ₱{selectedClient.history.length > 0 
                       ? (selectedClientStats.totalPaid / selectedClient.history.length).toFixed(2) 
@@ -659,9 +673,9 @@ export default function XyLoanApp() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Last Transaction</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">Last Activity</p>
                   <p className="text-sm font-bold">
-                    {selectedClient.history[0] ? format(new Date(selectedClient.history[0].date), 'MMM dd') : 'N/A'}
+                    {selectedClient.history[0] ? format(new Date(selectedClient.history[0].date), 'MMM dd') : 'None'}
                   </p>
                 </div>
               </div>
@@ -677,19 +691,19 @@ export default function XyLoanApp() {
               <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(false)}>
                 <ArrowLeft className="h-6 w-6" />
               </Button>
-              <h1 className="text-xl font-bold">Settings</h1>
+              <h1 className="text-xl font-bold">Application Settings</h1>
             </div>
           </header>
 
           <main className="p-6 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-bold">Database Management</CardTitle>
+                <CardTitle className="text-sm font-bold">Data Management</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col gap-2">
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={handleExport}>
-                    <Download className="h-4 w-4" /> Export Data (JSON)
+                    <Download className="h-4 w-4" /> Export All Records (JSON)
                   </Button>
                   <div className="relative">
                     <Input 
@@ -699,7 +713,7 @@ export default function XyLoanApp() {
                       onChange={handleImport}
                     />
                     <Button variant="outline" className="w-full justify-start gap-2 pointer-events-none">
-                      <Upload className="h-4 w-4" /> Import Data (JSON)
+                      <Upload className="h-4 w-4" /> Import Records (JSON)
                     </Button>
                   </div>
                 </div>
@@ -718,23 +732,36 @@ export default function XyLoanApp() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-bold">About Xy Loan Management</CardTitle>
+                <CardTitle className="text-sm font-bold">About CX Loan Tracker</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="font-bold text-base">Xy Loan Management</h3>
-                  <p className="text-xs font-semibold text-primary">Personal Loan & Payment Tracking</p>
+                <div className="flex items-center gap-4 mb-2">
+                  {logoImage && (
+                    <div className="relative h-12 w-12 overflow-hidden rounded-lg">
+                      <NextImage 
+                        src={logoImage.imageUrl} 
+                        alt="CX Logo" 
+                        fill 
+                        className="object-contain"
+                        data-ai-hint={logoImage.imageHint}
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-base">CX Loan Tracker</h3>
+                    <p className="text-xs font-semibold text-primary">Your Client & Payment Partner</p>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  A private application for tracking personal loans, payments, balances, and collections.
+                  This app is used for tracking your clients who loaned to you or you lend money to. It is designed to help individuals and small businesses manage their financial relationships with ease.
                 </p>
                 <div className="pt-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Developed by</p>
-                  <p className="text-sm font-bold">Xyril Garret Go</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Supported By</p>
+                  <p className="text-sm font-bold">CX Development Team</p>
                 </div>
                 <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
                   <p className="text-[10px] text-primary leading-tight">
-                    <strong>Local Data Control:</strong> Your records are stored on this device. Use "Export Data" to create manual backups.
+                    <strong>Local Storage:</strong> Your data is stored on this device. We recommend regular exports to keep your data safe.
                   </p>
                 </div>
               </CardContent>
@@ -768,10 +795,10 @@ export default function XyLoanApp() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteConfirm?.id === 'ALL_DATA' 
-                ? "This will PERMANENTLY delete all loan records on this device. This cannot be undone."
+                ? "This will PERMANENTLY delete all records on this device. This cannot be undone."
                 : deleteConfirm?.type === 'client' 
                   ? "This will delete the client and all their transaction history."
-                  : "This payment will be removed and the balance will be restored."
+                  : "This transaction record will be removed and the balance will be adjusted."
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
