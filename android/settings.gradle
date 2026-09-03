@@ -1,9 +1,5 @@
 include ':app'
 
-// This is the critical manual resolution for the Capacitor Android project
-// It allows Gradle to find the native bridge code in your node_modules
-project(':capacitor-android').projectDir = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
-
 // Auto-include Capacitor plugins from node_modules
 def localProperties = new Properties()
 def localPropertiesFile = new File(settingsDir, 'local.properties')
@@ -13,4 +9,4 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-apply from: '../node_modules/@capacitor/android/capacitor/capacitor.settings.gradle'
+apply from: 'capacitor.settings.gradle'
