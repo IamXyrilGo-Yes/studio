@@ -1,64 +1,52 @@
 
-# Xy Loan - Android Deployment Report
+# Xy Loan - Developer & Build Guide
 
-**Xy Loan** is a private loan and payment tracker designed for local-only, offline-first use. This project is configured as a native Android application using Capacitor.
+**Xy Loan** is a private loan and payment tracker designed for local-only use. It uses Next.js for the interface and Capacitor to package it into a standalone Android APK.
 
-## Final Android Application Report
+## 1. How to use `npm` (On your PC)
 
-- **Framework**: Next.js 15 (Static Export)
-- **Mobile Engine**: Capacitor 7.0
-- **App Identity**: `com.xyloan.app`
-- **Branding**: Xy Loan - Private Loan & Payment Tracker
-- **Developer**: Xyril Garret Go
-- **Offline Mode**: 100% Functional (Wi-Fi/Data Off compatible)
-- **Data Storage**: `localStorage` (Persistent within Android WebView)
-- **Back Navigation**: Hardware back button integration handled via `@capacitor/app`.
+You run `npm` commands in your computer's terminal (Command Prompt on Windows, or Terminal on Mac/Linux) while inside the `studio-main` folder.
 
-## 1. Prerequisites
-- **Node.js**: Installed on your development machine.
-- **Android Studio**: Required to compile and build the APK.
-- **Android SDK**: Latest SDK installed via Android Studio.
+### Common Commands:
+- `npm install`: Downloads the libraries needed to build the app (only needed once).
+- `npm run export`: Converts the code into static files for the Android app.
+- `npx cap sync`: Tells Capacitor to copy the latest files into the Android project.
 
-## 2. Building the APK
-To generate the static assets and prepare the Android project, follow these steps:
+---
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+## 2. Building the Android APK (Standalone)
 
-2. **Generate the Android Scaffolding** (Only if the `android` folder is missing):
-   ```bash
-   npx cap add android
-   ```
+Follow these steps on your computer to create the installer:
 
-3. **Build and Export the Web App**:
-   Generate the static `out` directory:
+1. **Open your Terminal** and navigate to your project folder.
+2. **Generate the Web Assets**:
    ```bash
    npm run export
    ```
+   *This creates the `out/` folder containing your local app.*
 
-4. **Sync with Android**:
-   Copy the static files to the Android project:
+3. **Sync with Android**:
    ```bash
-   npx cap copy
+   npx cap sync android
    ```
+   *This moves the `out/` folder into the Android Studio project.*
 
-5. **Open in Android Studio**:
-   ```bash
-   npx cap open android
-   ```
+4. **Open Android Studio**:
+   Open the `android/` folder specifically.
 
-6. **In Android Studio**:
-   - Wait for Gradle to finish syncing.
+5. **Build the APK**:
+   - In Android Studio, wait for the sync to finish.
    - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
-   - Once finished, click **Locate** on the notification to find your `app-debug.apk`.
+   - Once done, a notification will appear. Click **Locate** to find `app-debug.apk`.
 
-## 3. Important Notes
-- **Self-Contained**: The APK bundles all HTML, CSS, and JS assets. It does NOT require a server, Node.js, or internet to run.
-- **Single Source of Truth**: All financial calculations are derived dynamically from transaction history.
-- **Local Data**: Data survives app restarts and reboots as it is stored in persistent device-local storage.
-- **Back Button**: The Android hardware back button will close open views or details before exiting the app.
+---
+
+## 3. Important Runtime Notes
+
+- **Zero Server Dependency**: The installed APK does **not** need `npm`, `node`, or a server to run. It loads files directly from its own internal memory.
+- **Offline First**: Works 100% without internet.
+- **Local Storage**: All data (Clients, Loans, Payments) is stored securely on the phone's local storage.
+- **Single Source of Truth**: Statistics are calculated dynamically from payment records to ensure 100% accuracy.
 
 ---
 Developed by Xyril Garret Go
