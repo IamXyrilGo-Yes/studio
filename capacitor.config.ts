@@ -7,7 +7,6 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
-    // Do NOT set a server.url for production; this ensures static assets are loaded locally
     cleartext: true
   },
   android: {
