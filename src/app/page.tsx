@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -16,6 +17,17 @@ import { useToast } from "@/hooks/use-toast"
 import { v4 as uuidv4 } from 'uuid'
 import { format } from "date-fns"
 
+/**
+ * Utility to derive accurate client statistics from their payment history.
+ * This is the Single Source of Truth for the application.
+ */
+function getClientStats(client: Client) {
+  const totalPaid = client.history.reduce((sum, item) => sum + item.amount, 0)
+  const remainingBalance = Math.max(0, client.initialBalance - totalPaid)
+  const isSettled = remainingBalance <= 0
+  return { totalPaid, remainingBalance, isSettled }
+}
+
 export default function PisoMateApp() {
   const [clients, setClients] = React.useState<Client[]>([])
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -28,19 +40,26 @@ export default function PisoMateApp() {
     setClients(db.getData().clients)
   }, [])
 
+  // Derived statistics for the dashboard
+  const stats = React.useMemo(() => {
+    return clients.reduce((acc, client) => {
+      const { totalPaid, remainingBalance, isSettled } = getClientStats(client)
+      return {
+        totalCollected: acc.totalCollected + totalPaid,
+        totalOutstanding: acc.totalOutstanding + remainingBalance,
+        totalSettled: acc.totalSettled + (isSettled ? 1 : 0)
+      }
+    }, { totalCollected: 0, totalOutstanding: 0, totalSettled: 0 })
+  }, [clients])
+
   const filteredClients = clients
     .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
-      const aSettled = a.outstandingBalance <= 0
-      const bSettled = b.outstandingBalance <= 0
-      if (aSettled === bSettled) return 0
-      return aSettled ? 1 : -1
+      const aStats = getClientStats(a)
+      const bStats = getClientStats(b)
+      if (aStats.isSettled === bStats.isSettled) return 0
+      return aStats.isSettled ? 1 : -1
     })
-
-  const totalOutstanding = clients.reduce((acc, c) => acc + c.outstandingBalance, 0)
-  const totalCollected = clients.reduce((acc, c) => acc + c.totalPaid, 0)
-  const totalClients = clients.length
-  const totalSettled = clients.filter(c => c.outstandingBalance <= 0).length
 
   const handleAddClient = (newClient: Client) => {
     db.addClient(newClient)
@@ -58,18 +77,31 @@ export default function PisoMateApp() {
   }
 
   const updateClientState = (updatedClient: Client) => {
-    db.updateClient(updatedClient)
-    const newClients = clients.map(c => c.id === updatedClient.id ? updatedClient : c)
+    // Before saving, ensure aggregate fields are synced from history to "heal" the data
+    const { totalPaid, remainingBalance } = getClientStats(updatedClient)
+    const syncedClient = {
+      ...updatedClient,
+      totalPaid,
+      outstandingBalance: remainingBalance
+    }
+    
+    db.updateClient(syncedClient)
+    const newClients = clients.map(c => c.id === syncedClient.id ? syncedClient : c)
     setClients(newClients)
-    setSelectedClient(updatedClient)
+    if (selectedClient?.id === syncedClient.id) {
+      setSelectedClient(syncedClient)
+    }
   }
 
   const handleRegularPayment = () => {
     if (!selectedClient) return
     
+    const { remainingBalance } = getClientStats(selectedClient)
+    if (remainingBalance <= 0) return
+
     // Formula: Regular Payment = (Loan Amount * 1.1) / 22
     const regularAmount = selectedClient.initialBalance / 22
-    const finalAmount = Math.min(regularAmount, selectedClient.outstandingBalance)
+    const finalAmount = Math.min(regularAmount, remainingBalance)
     
     const historyItem: PaymentHistoryItem = {
       id: uuidv4(),
@@ -80,8 +112,6 @@ export default function PisoMateApp() {
 
     const updatedClient: Client = {
       ...selectedClient,
-      totalPaid: selectedClient.totalPaid + finalAmount,
-      outstandingBalance: Math.max(0, selectedClient.outstandingBalance - finalAmount),
       history: [historyItem, ...selectedClient.history]
     }
 
@@ -95,7 +125,10 @@ export default function PisoMateApp() {
   const handleCustomPaymentConfirm = (amount: number, notes?: string) => {
     if (!selectedClient) return
     
-    const finalAmount = Math.min(amount, selectedClient.outstandingBalance)
+    const { remainingBalance } = getClientStats(selectedClient)
+    if (remainingBalance <= 0) return
+    
+    const finalAmount = Math.min(amount, remainingBalance)
     
     const historyItem: PaymentHistoryItem = {
       id: uuidv4(),
@@ -107,8 +140,6 @@ export default function PisoMateApp() {
 
     const updatedClient: Client = {
       ...selectedClient,
-      totalPaid: selectedClient.totalPaid + finalAmount,
-      outstandingBalance: Math.max(0, selectedClient.outstandingBalance - finalAmount),
       history: [historyItem, ...selectedClient.history]
     }
 
@@ -124,14 +155,9 @@ export default function PisoMateApp() {
     if (!selectedClient) return
 
     if (confirm("Remove this payment record? Balance will be restored.")) {
-      const itemToDelete = selectedClient.history.find(h => h.id === id)
-      if (!itemToDelete) return
-
       const updatedHistory = selectedClient.history.filter(h => h.id !== id)
       const updatedClient: Client = {
         ...selectedClient,
-        totalPaid: selectedClient.totalPaid - itemToDelete.amount,
-        outstandingBalance: selectedClient.outstandingBalance + itemToDelete.amount,
         history: updatedHistory
       }
 
@@ -139,6 +165,8 @@ export default function PisoMateApp() {
       toast({ title: "Payment record deleted" })
     }
   }
+
+  const selectedClientStats = selectedClient ? getClientStats(selectedClient) : null
 
   return (
     <div className="mobile-container pb-24">
@@ -154,25 +182,25 @@ export default function PisoMateApp() {
               <Card className="bg-white/10 border-none text-primary-foreground">
                 <CardContent className="p-3">
                   <p className="text-[10px] font-medium opacity-70 mb-1">Total Collected</p>
-                  <p className="text-lg font-bold"><Currency amount={totalCollected} /></p>
+                  <p className="text-lg font-bold"><Currency amount={stats.totalCollected} /></p>
                 </CardContent>
               </Card>
               <Card className="bg-white/10 border-none text-primary-foreground">
                 <CardContent className="p-3">
                   <p className="text-[10px] font-medium opacity-70 mb-1">Outstanding</p>
-                  <p className="text-lg font-bold"><Currency amount={totalOutstanding} /></p>
+                  <p className="text-lg font-bold"><Currency amount={stats.totalOutstanding} /></p>
                 </CardContent>
               </Card>
               <Card className="bg-white/10 border-none text-primary-foreground">
                 <CardContent className="p-3">
                   <p className="text-[10px] font-medium opacity-70 mb-1">Clients</p>
-                  <p className="text-lg font-bold">{totalClients}</p>
+                  <p className="text-lg font-bold">{clients.length}</p>
                 </CardContent>
               </Card>
               <Card className="bg-white/10 border-none text-primary-foreground">
                 <CardContent className="p-3">
                   <p className="text-[10px] font-medium opacity-70 mb-1">Settled</p>
-                  <p className="text-lg font-bold">{totalSettled}</p>
+                  <p className="text-lg font-bold">{stats.totalSettled}</p>
                 </CardContent>
               </Card>
             </div>
@@ -193,7 +221,7 @@ export default function PisoMateApp() {
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Client List</h2>
               {filteredClients.length > 0 ? (
                 filteredClients.map(client => {
-                  const isSettled = client.outstandingBalance <= 0
+                  const { remainingBalance, isSettled } = getClientStats(client)
                   return (
                     <Card 
                       key={client.id} 
@@ -210,7 +238,7 @@ export default function PisoMateApp() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Bal: <Currency amount={client.outstandingBalance} className="text-foreground" />
+                              Bal: <Currency amount={remainingBalance} className="text-foreground" />
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -247,7 +275,7 @@ export default function PisoMateApp() {
       )}
 
       {/* Client Detail View */}
-      {selectedClient && (
+      {selectedClient && selectedClientStats && (
         <div className="animate-in fade-in slide-in-from-left-4 duration-300 bg-background min-h-screen">
           <header className="p-6 bg-white border-b sticky top-0 z-20">
             <div className="flex items-center gap-4 mb-4">
@@ -256,8 +284,8 @@ export default function PisoMateApp() {
               </Button>
               <div className="flex flex-col">
                 <h1 className="text-xl font-bold truncate">{selectedClient.name}</h1>
-                <Badge variant={selectedClient.outstandingBalance <= 0 ? "default" : "outline"} className={`w-fit mt-1 ${selectedClient.outstandingBalance <= 0 ? "bg-green-500" : "text-orange-500 border-orange-500"}`}>
-                  {selectedClient.outstandingBalance <= 0 ? "Settled" : "Ongoing"}
+                <Badge variant={selectedClientStats.isSettled ? "default" : "outline"} className={`w-fit mt-1 ${selectedClientStats.isSettled ? "bg-green-500" : "text-orange-500 border-orange-500"}`}>
+                  {selectedClientStats.isSettled ? "Settled" : "Ongoing"}
                 </Badge>
               </div>
             </div>
@@ -273,15 +301,15 @@ export default function PisoMateApp() {
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
                 <p className="text-[10px] text-primary uppercase mb-1">Current Balance</p>
-                <Currency amount={selectedClient.outstandingBalance} className="text-sm font-bold text-primary" />
+                <Currency amount={selectedClientStats.remainingBalance} className="text-sm font-bold text-primary" />
               </div>
               <div className="p-3 bg-accent/10 rounded-lg">
                 <p className="text-[10px] text-accent-foreground uppercase mb-1">Total Paid</p>
-                <Currency amount={selectedClient.totalPaid} className="text-sm font-bold text-accent-foreground" />
+                <Currency amount={selectedClientStats.totalPaid} className="text-sm font-bold text-accent-foreground" />
               </div>
             </div>
 
-            {selectedClient.outstandingBalance > 0 && (
+            {!selectedClientStats.isSettled && (
               <div className="grid grid-cols-2 gap-2">
                 <Button 
                   className="h-12 text-sm font-bold" 
@@ -361,12 +389,12 @@ export default function PisoMateApp() {
         onAdd={handleAddClient} 
       />
 
-      {selectedClient && (
+      {selectedClient && selectedClientStats && (
         <PaymentLogModal 
           open={isCustomPaymentModalOpen}
           onOpenChange={setIsCustomPaymentModalOpen}
           onConfirm={handleCustomPaymentConfirm}
-          maxAmount={selectedClient.outstandingBalance}
+          maxAmount={selectedClientStats.remainingBalance}
         />
       )}
     </div>
