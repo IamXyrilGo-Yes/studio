@@ -1,8 +1,8 @@
 
 {
-  "name": "xy-loan-app",
+  "name": "xy-loan-management",
   "version": "0.1.0",
-  "description": "Private Loan & Payment Tracker - A local, offline-first application for securely tracking personal loans, payments, balances, and collections.",
+  "description": "Private application for tracking personal loans, payments, balances, and collections.",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",

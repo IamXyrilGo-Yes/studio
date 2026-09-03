@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -311,9 +312,9 @@ export default function XyLoanApp() {
             <div className="flex justify-between items-center mb-4">
               <div className="flex flex-col">
                 <h1 className="text-2xl font-bold tracking-tight">Xy Loan Management</h1>
-                <p className="text-[10px] font-medium opacity-90 mt-0.5">Private Loan & Payment Tracker</p>
+                <p className="text-[10px] font-medium opacity-90 mt-0.5">Personal Loan & Payment Tracking</p>
                 <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[220px]">
-                  A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
+                  A private application for tracking personal loans, payments, balances, and collections.
                 </p>
               </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setIsSettingsOpen(true)}>
@@ -722,10 +723,10 @@ export default function XyLoanApp() {
               <CardContent className="space-y-4">
                 <div className="space-y-1">
                   <h3 className="font-bold text-base">Xy Loan Management</h3>
-                  <p className="text-xs font-semibold text-primary">Private Loan & Payment Tracker</p>
+                  <p className="text-xs font-semibold text-primary">Personal Loan & Payment Tracking</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
+                  A private application for tracking personal loans, payments, balances, and collections.
                 </p>
                 <div className="pt-2">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Developed by</p>
@@ -733,7 +734,7 @@ export default function XyLoanApp() {
                 </div>
                 <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
                   <p className="text-[10px] text-primary leading-tight">
-                    <strong>Local-Only Storage:</strong> Your loan records are stored locally on this device. No cloud sync or external servers are used. Please use "Export Data" regularly to create manual backups.
+                    <strong>Local Data Control:</strong> Your records are stored on this device. Use "Export Data" to create manual backups.
                   </p>
                 </div>
               </CardContent>

@@ -1,6 +1,7 @@
-# Xy Loan Management - Developer & Build Guide
 
-**Xy Loan Management** is a private loan and payment tracker designed for local-only use. It uses Next.js for the interface and Capacitor to package it into a standalone Android APK.
+# Xy Loan Management
+
+**Xy Loan Management** is a private application for tracking personal loans, payments, balances, and collections.
 
 ## 1. How to use `npm` (On your PC)
 
@@ -8,7 +9,7 @@ You run `npm` commands in your computer's terminal (Command Prompt) while inside
 
 ### Step-by-Step Terminal Instructions:
 
-1.  **Open Command Prompt** (the window you have open).
+1.  **Open Command Prompt**.
 2.  **Navigate to your project folder**:
     ```bash
     cd "C:\Users\LENOVO\OneDrive\Documents\studio-main\studio-main"
@@ -37,7 +38,7 @@ Follow these steps **after** running the `npm` commands above:
 
 1. **Open Android Studio**.
 2. Go to **File > Open** and select the `android/` folder specifically inside your project.
-3. Wait for the "Gradle Sync" to finish (watch the bar at the bottom).
+3. Wait for the "Gradle Sync" to finish.
 4. **Build the APK**:
    - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
    - Once done, a notification will appear. Click **Locate** to find `app-debug.apk`.
@@ -47,8 +48,7 @@ Follow these steps **after** running the `npm` commands above:
 ## 3. Important Runtime Notes
 
 - **Zero Server Dependency**: The installed APK does **not** need `npm`, `node`, or a server to run. It loads files locally.
-- **Offline First**: Works 100% without internet.
-- **Local Storage**: All data is stored securely on the phone's local storage.
+- **Data Control**: All data is stored securely on the phone's local storage.
 - **Single Source of Truth**: Statistics are calculated dynamically from payment records for 100% accuracy.
 
 ---

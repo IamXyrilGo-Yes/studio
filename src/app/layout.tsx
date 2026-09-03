@@ -1,9 +1,10 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Xy Loan Management | Private Loan & Payment Tracker',
-  description: 'A local, offline-first application for securely tracking personal loans, payments, balances, and collections.',
+  title: 'Xy Loan Management',
+  description: 'A private application for tracking personal loans, payments, balances, and collections.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
 };
 
