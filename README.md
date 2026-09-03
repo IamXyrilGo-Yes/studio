@@ -1,7 +1,7 @@
 
 # Xy Loan - Android Deployment Report
 
-**Xy Loan** is a private loan and payment tracker designed for local-only, offline-first use. This project has been converted into a self-contained Android application using Capacitor.
+**Xy Loan** is a private loan and payment tracker designed for local-only, offline-first use. This project is configured as a native Android application using Capacitor.
 
 ## Final Android Application Report
 
@@ -27,24 +27,29 @@ To generate the static assets and prepare the Android project, follow these step
    npm install
    ```
 
-2. **Build and Export the Web App**:
+2. **Generate the Android Scaffolding** (Only if the `android` folder is missing):
+   ```bash
+   npx cap add android
+   ```
+
+3. **Build and Export the Web App**:
    Generate the static `out` directory:
    ```bash
    npm run export
    ```
 
-3. **Sync with Android**:
+4. **Sync with Android**:
    Copy the static files to the Android project:
    ```bash
    npx cap copy
    ```
 
-4. **Open in Android Studio**:
+5. **Open in Android Studio**:
    ```bash
    npx cap open android
    ```
 
-5. **In Android Studio**:
+6. **In Android Studio**:
    - Wait for Gradle to finish syncing.
    - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
    - Once finished, click **Locate** on the notification to find your `app-debug.apk`.
