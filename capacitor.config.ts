@@ -1,9 +1,8 @@
-
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.xyloan.app',
-  appName: 'Xy Loan',
+  appName: 'Xy Loan Management',
   webDir: 'out',
   bundledWebRuntime: false,
   server: {

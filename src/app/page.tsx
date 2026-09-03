@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -158,6 +157,11 @@ export default function XyLoanApp() {
       const sA = getClientStats(a)
       const sB = getClientStats(b)
 
+      // Always show ongoing clients above settled clients as a secondary sort
+      if (sA.isSettled !== sB.isSettled) {
+        return sA.isSettled ? 1 : -1
+      }
+
       switch (sortBy) {
         case 'balance_desc': return sB.remainingBalance - sA.remainingBalance
         case 'balance_asc': return sA.remainingBalance - sB.remainingBalance
@@ -306,7 +310,7 @@ export default function XyLoanApp() {
           <header className="p-6 bg-primary text-primary-foreground sticky top-0 z-10 shadow-md">
             <div className="flex justify-between items-center mb-4">
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold tracking-tight">Xy Loan</h1>
+                <h1 className="text-2xl font-bold tracking-tight">Xy Loan Management</h1>
                 <p className="text-[10px] font-medium opacity-90 mt-0.5">Private Loan & Payment Tracker</p>
                 <p className="text-[8px] opacity-70 leading-tight mt-1 max-w-[220px]">
                   A local, offline-first application for securely tracking personal loans, payments, balances, and collections.
@@ -713,11 +717,11 @@ export default function XyLoanApp() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-bold">About Xy Loan</CardTitle>
+                <CardTitle className="text-sm font-bold">About Xy Loan Management</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1">
-                  <h3 className="font-bold text-base">Xy Loan</h3>
+                  <h3 className="font-bold text-base">Xy Loan Management</h3>
                   <p className="text-xs font-semibold text-primary">Private Loan & Payment Tracker</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">

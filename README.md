@@ -1,7 +1,6 @@
+# Xy Loan Management - Developer & Build Guide
 
-# Xy Loan - Developer & Build Guide
-
-**Xy Loan** is a private loan and payment tracker designed for local-only use. It uses Next.js for the interface and Capacitor to package it into a standalone Android APK.
+**Xy Loan Management** is a private loan and payment tracker designed for local-only use. It uses Next.js for the interface and Capacitor to package it into a standalone Android APK.
 
 ## 1. How to use `npm` (On your PC)
 
