@@ -3,8 +3,8 @@
     {
       "id": "app-logo",
       "description": "CX Loan Tracker Logo",
-      "imageUrl": "https://picsum.photos/seed/cx-logo/200/200",
-      "imageHint": "geometric logo"
+      "imageUrl": "https://picsum.photos/seed/cx-logo-blue/200/200",
+      "imageHint": "blue geometric blocks logo"
     }
   ]
 }

@@ -749,15 +749,15 @@ export default function CXLoanTracker() {
                   )}
                   <div className="space-y-1">
                     <h3 className="font-bold text-base">CX Loan Tracker</h3>
-                    <p className="text-xs font-semibold text-primary">Your Client & Payment Partner</p>
+                    <p className="text-xs font-semibold text-primary">Your client tracking and management partner</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   This app is used for tracking your clients who loaned to you or you lend money to. It is designed to help individuals and small businesses manage their financial relationships with ease.
                 </p>
                 <div className="pt-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Supported By</p>
-                  <p className="text-sm font-bold">CX Development Team</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Developed By</p>
+                  <p className="text-sm font-bold">Xyril Go</p>
                 </div>
                 <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
                   <p className="text-[10px] text-primary leading-tight">

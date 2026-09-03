@@ -52,4 +52,4 @@ Follow these steps **after** running the `npm` commands above:
 - **Single Source of Truth**: Statistics are calculated dynamically from payment records for 100% accuracy.
 
 ---
-Developed by CX Development Team
+Developed by Xyril Go
