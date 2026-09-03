@@ -2,14 +2,13 @@
 "use client"
 
 import * as React from "react"
-import NextImage from "next/image"
 import { 
   Search, Plus, Trash2, ArrowLeft, ChevronRight, History, Calendar, 
   PhilippinePeso, Clock, Filter, Settings, Download, Upload, 
   AlertTriangle, CheckCircle2, Info, Edit2, TrendingUp, DollarSign
 } from "lucide-react"
 import { db } from "@/lib/db"
-import { Client, PaymentHistoryItem, AppData } from "@/lib/types"
+import { Client, PaymentHistoryItem } from "@/lib/types"
 import { Currency } from "@/components/ui/currency"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +23,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { format, isBefore, startOfDay } from "date-fns"
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
-import { PlaceHolderImages } from "@/lib/placeholder-images"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -314,7 +312,7 @@ export default function CXLoanTracker() {
             <div className="flex justify-between items-center mb-4">
               <div className="flex flex-col">
                 <h1 className="text-2xl font-bold tracking-tight">CX Loan Tracker</h1>
-                <p className="text-[10px] font-medium opacity-90 mt-0.5">Manage Your Clients & Loan History</p>
+                <p className="text-[10px] font-medium opacity-90 mt-0.5">Your client tracking and management partner</p>
               </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setIsSettingsOpen(true)}>
                 <Settings className="h-6 w-6" />
@@ -645,26 +643,6 @@ export default function CXLoanTracker() {
                 </Card>
               </div>
             )}
-
-            <div className="mt-8 p-4 bg-primary/5 rounded-lg border border-primary/10 space-y-3">
-              <h3 className="text-xs font-bold uppercase text-primary">Summary Stats</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Average Transaction</p>
-                  <p className="text-sm font-bold">
-                    ₱{selectedClient.history.length > 0 
-                      ? (selectedClientStats.totalPaid / selectedClient.history.length).toFixed(2) 
-                      : '0.00'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase">Last Activity</p>
-                  <p className="text-sm font-bold">
-                    {selectedClient.history[0] ? format(new Date(selectedClient.history[0].date), 'MMM dd') : 'None'}
-                  </p>
-                </div>
-              </div>
-            </div>
           </main>
         </div>
       )}
@@ -727,16 +705,11 @@ export default function CXLoanTracker() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  This app is used for tracking your clients who loaned to you or you lend money to. It is designed to help individuals and small businesses manage their financial relationships with ease.
+                  This app is used for tracking your clients who loaned to you or you lend money to. It helps you manage balances and payment history effortlessly.
                 </p>
                 <div className="pt-2">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Developed By</p>
                   <p className="text-sm font-bold">Xyril Go</p>
-                </div>
-                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                  <p className="text-[10px] text-primary leading-tight">
-                    <strong>Local Storage:</strong> Your data is stored on this device. We recommend regular exports to keep your data safe.
-                  </p>
                 </div>
               </CardContent>
             </Card>
