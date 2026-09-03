@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'CX Loan Tracker',
-  description: 'An app for tracking clients who loaned to you or you lend money to. Manage balances and payment history effortlessly.',
+  description: 'An app for tracking your clients who loaned to you or you lend money to. Manage balances and payment history effortlessly.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
 };
 

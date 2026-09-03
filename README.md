@@ -1,7 +1,7 @@
 
-# Xy Loan Management
+# CX Loan Tracker
 
-**Xy Loan Management** is a private application for tracking personal loans, payments, balances, and collections.
+**CX Loan Tracker** is an application for tracking your clients who loaned to you or you lend money to. It helps you manage balances, payment history, and collection statistics effortlessly.
 
 ## 1. How to use `npm` (On your PC)
 
@@ -52,4 +52,4 @@ Follow these steps **after** running the `npm` commands above:
 - **Single Source of Truth**: Statistics are calculated dynamically from payment records for 100% accuracy.
 
 ---
-Developed by Xyril Garret Go
+Developed by CX Development Team

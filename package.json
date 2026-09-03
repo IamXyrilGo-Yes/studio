@@ -2,7 +2,7 @@
 {
   "name": "cx-loan-tracker",
   "version": "0.1.0",
-  "description": "An app for tracking clients who loaned to you or you lend money to. A tool for managing balances and payment history.",
+  "description": "An app for tracking your clients who loaned to you or you lend money to. A tool for managing balances and payment history.",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
